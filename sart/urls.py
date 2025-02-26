@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from .views import SampleCreate, DummyGetLast
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('sample/create/', SampleCreate.as_view()),
+    path('sample/dummy/last/', DummyGetLast.as_view()),
 ]
