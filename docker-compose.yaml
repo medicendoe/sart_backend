@@ -1,0 +1,77 @@
+volumes:
+  mysql-data:
+
+services:
+
+  database:
+    image: mysql
+    restart: always
+    container_name: database
+    environment:  
+      MYSQL_ROOT_PASSWORD: sart
+      MYSQL_DATABASE: sart
+      MYSQL_PORT: 3306
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    attach: false
+    profiles:
+      - prod
+      - dev
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      - database
+    environment:
+      - SECRET_KEY=django-insecure-@vb7#n+=9bgqq!io+8n=vlex6(1n%em!ygi7^12!+=h3-^o&_9
+      - DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=localhost
+      - DB_NAME=sart
+      - DB_USER=root
+      - DB_PASSWORD=sart
+      - DB_HOST=database
+    ports:
+      - '8000:8000'
+    profiles:
+      - prod
+
+  apidev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apidev
+    depends_on:
+      - database
+    environment:
+      - SECRET_KEY=django-insecure-@vb7#n+=9bgqq!io+8n=vlex6(1n%em!ygi7^12!+=h3-^o&_9
+      - DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost
+      - DB_NAME=sart
+      - DB_USER=root
+      - DB_PASSWORD=sart
+      - DB_HOST=database
+    volumes:
+      - type: bind
+        source: ./sart
+        target: /app/sart
+    ports:
+      - '8000:8000'
+    profiles:
+      - dev
+
+  server:
+    restart: always
+    image: nginx
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    profiles:
+      - prod
