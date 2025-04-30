@@ -1,8 +1,11 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import GlucoseSample, InsulinSample, Sample
-from .serializers import SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer, GlucoseSampleSerializer
+from .models import GlucoseSample, InsulinSample, Sample, Center, Personnel, Patient, Person
+from .serializers import (
+    SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer,
+    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer
+)
 
 class SampleCreate(APIView):
     def post(self, request, *args, **kwargs):
@@ -61,3 +64,144 @@ class DummyGetLast(APIView):
         except Sample.DoesNotExist:
 
             return Response({"detail": "No sample found."}, status=status.HTTP_404_NOT_FOUND)
+
+class CenterCreate(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CenterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CenterList(APIView):
+    def get(self, request, *args, **kwargs):
+        centers = Center.objects.all()
+        serializer = CenterSerializer(centers, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PersonnelCreate(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PersonnelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PersonnelList(APIView):
+    def get(self, request, *args, **kwargs):
+        personnels = Personnel.objects.all()
+        serializer = PersonnelSerializer(personnels, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PatientCreate(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PatientSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PatientList(APIView):
+    def get(self, request, *args, **kwargs):
+        patients = Patient.objects.all()
+        serializer = PatientSerializer(patients, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PatientsByPersonnel(APIView):
+    def get(self, request, personnel_id, *args, **kwargs):
+        try:
+            # Verify if the personnel exists
+            personnel = Personnel.objects.get(id=personnel_id)
+            
+            # Get all patients assigned to this personnel
+            patients = Patient.objects.filter(personnels=personnel)
+            
+            # Serialize the patients
+            serializer = PatientSerializer(patients, many=True)
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Personnel.DoesNotExist:
+            return Response(
+                {"error": f"Personnel with id {personnel_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class PersonnelByCenter(APIView):
+    def get(self, request, center_id, *args, **kwargs):
+        try:
+            # Verify if the center exists
+            center = Center.objects.get(id=center_id)
+            
+            # Get all personnel from this center
+            personnel = Personnel.objects.filter(centers=center)
+            
+            # Serialize the personnel
+            serializer = PersonnelSerializer(personnel, many=True)
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Center.DoesNotExist:
+            return Response(
+                {"error": f"Center with id {center_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class PersonnelLogin(APIView):
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            email = request.data.get('email')
+            password = request.data.get('password')
+            
+            # Validación básica
+            if not email or not password:
+                return Response({'error': 'Email y contraseña son obligatorios'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Buscar persona por email
+            try:
+                person = Person.objects.get(email=email)
+            except Person.DoesNotExist:
+                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Verificar si tiene un perfil de personal asociado
+            try:
+                personnel = Personnel.objects.get(person=person)
+            except Personnel.DoesNotExist:
+                return Response({'error': 'Este usuario no es personal médico'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Verificar contraseña - autenticación simple
+            if personnel.password != password:
+                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Retornar éxito y datos básicos (sin token)
+            return Response({
+                'success': True,
+                'user': {
+                    'id': personnel.id,
+                    'name': f"{person.first_name} {person.first_surname}",
+                    'email': person.email,
+                    'specialty': personnel.specialty
+                }
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DeviceCreate(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = DeviceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
