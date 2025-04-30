@@ -3,10 +3,9 @@ from django.db import models
 
 class Sample(models.Model):
     version = models.CharField(max_length=5)
-    id_device = models.CharField(max_length=15)
+    id_device = models.ForeignKey('Device', on_delete=models.CASCADE, related_name='samples')
     geolocation = models.CharField(max_length=100)
     send_data = models.DateTimeField()
-
 
 class InsulinSample(models.Model):
     sample = models.OneToOneField(Sample, on_delete=models.CASCADE)
@@ -18,6 +17,10 @@ class InsulinSample(models.Model):
     confirm_insulin_admin = models.DateTimeField()
     insulin_dose = models.IntegerField()
     insulin_type = models.CharField(max_length=50)
+
+class Device(models.Model):
+    id_device = models.CharField(max_length=100, primary_key=True)
+    patient = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='devices', null=True)
 
 class GlucoseSample(models.Model):
     sample = models.OneToOneField(Sample, on_delete=models.CASCADE)
@@ -40,6 +43,7 @@ class Treatment(models.Model):
     quantity = models.IntegerField()
     first_administration = models.TimeField()
     second_administration = models.TimeField()
+    patient = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='treatments')
 
 class Person(models.Model):
     rut = models.CharField(max_length=9)
@@ -52,15 +56,16 @@ class Person(models.Model):
     gender = models.CharField(max_length=1)
     address = models.CharField(max_length=200)
     mobile = models.PositiveIntegerField()
+    email = models.CharField(max_length=200)
 
 class Personnel(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE)
     specialty = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
+    centers = models.ManyToManyField('Center', related_name='centers')
 
-class Paciente(models.Model):
+class Patient(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE)
-    email = models.CharField(max_length=200)
     emergency_contact = models.CharField(max_length=200)
     emergency_email = models.CharField(max_length=200)
     emergency_mobile = models.PositiveIntegerField()
@@ -69,3 +74,4 @@ class Paciente(models.Model):
     last_hba1c = models.PositiveIntegerField()
     stroke_suffered = models.BooleanField(default=False)
     blood_preassure = models.PositiveIntegerField()
+    personnels = models.ManyToManyField('Personnel', related_name='patients')
