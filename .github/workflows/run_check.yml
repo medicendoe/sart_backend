@@ -29,7 +29,7 @@ jobs:
 
       # Inicia en detached (segundo plano)
       - name: Build and Run Docker Compose (Detached)
-        run: docker compose --file docker-compose.yaml up --profile prod --build -d
+        run: docker compose --file docker-compose.yaml --profile prod up --build -d
 
       # Espera un poco para que los contenedores intenten arrancar
       - name: Wait for services startup attempt
@@ -64,4 +64,4 @@ jobs:
       # Detiene y elimina los contenedores
       - name: Stop and Remove Docker Compose services
         if: always()
-        run: docker compose --file docker-compose.yaml down --volumes
+        run: docker compose --file docker-compose.yaml --profile prod down --volumes
