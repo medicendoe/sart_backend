@@ -1,0 +1,67 @@
+# Nombre del workflow (aparecerá en la pestaña "Actions" de GitHub)
+name: Runing check
+
+on:
+  pull_request:
+    # Especifica la rama de destino del Pull Request
+    branches:
+      - develop
+      - main
+    # (Opcional pero recomendado) Especifica los tipos de eventos de PR que lo activan
+    # 'opened': Cuando se abre el PR por primera vez.
+    # 'synchronize': Cuando se empujan nuevos commits a la rama origen del PR.
+    types: [opened, synchronize]
+
+# Trabajos (jobs) que se ejecutarán
+jobs:
+  # Nombre del job (puedes elegir el que quieras)
+  validate-compose:
+    # Nombre descriptivo del job (se muestra en la UI de GitHub)
+    name: Validate Docker Compose Setup
+    # Máquina virtual donde se ejecutará el job (Ubuntu es común para Docker)
+    runs-on: ubuntu-latest
+
+    # Pasos (steps) que se ejecutarán secuencialmente
+    # En tu archivo de workflow de GitHub Actions:
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Inicia en detached (segundo plano)
+      - name: Build and Run Docker Compose (Detached)
+        run: docker compose --file docker-compose.yaml --profile prod up --build -d
+
+      # Espera un poco para que los contenedores intenten arrancar
+      - name: Wait for services startup attempt
+        run: sleep 30 
+
+      # Verifica el estado de los contenedores
+      - name: Check container status
+        run: |
+          # Busca contenedores que NO estén en estado 'running' o 'healthy' (si usas healthchecks)
+          # El comando 'docker compose ps --quiet --filter status=running' lista los IDs de los que SÍ corren
+          # Comparamos con la lista total de servicios esperados
+          EXPECTED_SERVICES=$(docker compose --profile prod config --services)
+          RUNNING_SERVICES=$(docker compose --profile prod ps --quiet --filter status=running)
+          
+          # O una forma más simple: buscar contenedores con estado exited/dead
+          EXITED_CONTAINERS=$(docker compose --profile prod ps --quiet --filter status=exited)
+          if [ -n "$EXITED_CONTAINERS" ]; then
+              echo "::error::One or more containers exited unexpectedly!"
+              docker compose --profile prod ps # Muestra estado de todos
+              echo "--- Logs from exited containers ---"
+              docker compose --profile prod logs # Muestra logs, puede ayudar a ver por qué falló
+              exit 1
+          else
+              echo "All expected services seem to be running or starting."
+              docker compose --profile prod ps
+          fi
+          # Nota: Podrías añadir verificaciones más robustas aquí, como esperar healthchecks
+
+      # (Aquí podrías ejecutar pruebas)
+
+      # Paso 5: Detener y eliminar los contenedores para limpiar el entorno
+      # Detiene y elimina los contenedores
+      - name: Stop and Remove Docker Compose services
+        if: always()
+        run: docker compose --file docker-compose.yaml --profile prod down --volumes

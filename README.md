@@ -167,5 +167,35 @@ The `docs` folder also contains a Postman environment file for setting up variab
 
 ---
 
+## GitHub Workflow and Gitflow
+
+### GitHub Workflow
+This project uses a GitHub Actions workflow to validate the Docker Compose setup. The workflow is defined in `.github/workflows/run_check.yml` and is triggered on pull requests targeting the `develop` or `main` branches. 
+
+#### Key Steps in the Workflow:
+1. **Checkout Code**: The workflow checks out the code from the repository.
+2. **Build and Run Docker Compose**: It builds and starts the Docker Compose services in detached mode using the `prod` profile.
+3. **Service Validation**: The workflow waits for the services to start and checks their status. If any container exits unexpectedly, the logs are displayed for debugging.
+4. **Cleanup**: After validation, the workflow stops and removes the Docker Compose services to clean up the environment.
+
+This ensures that the Docker Compose setup is functional and ready for deployment.
+
+### Gitflow and Pull Requests
+The project follows the Gitflow branching model:
+- **Main Branch**: Contains the production-ready code.
+- **Develop Branch**: Used for integrating features and preparing for the next release.
+- **Feature Branches**: Created for individual features or tasks. These branches are merged into `develop` via pull requests.
+- **Hotfix Branches**: Used for urgent fixes in the `main` branch.
+
+#### Pull Request Workflow:
+1. Create a feature or hotfix branch from `develop` or `main`.
+2. Push your changes and open a pull request targeting the appropriate branch (`develop` or `main`).
+3. The GitHub Actions workflow will automatically validate the changes.
+4. Once approved, the pull request is merged into the target branch.
+
+This structure ensures a clean and organized development process while maintaining code quality and stability.
+
+---
+
 ## Contributors
 - Gabriel Gallardo R. (Doe)
