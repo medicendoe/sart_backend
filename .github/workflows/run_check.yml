@@ -22,40 +22,46 @@ jobs:
     runs-on: ubuntu-latest
 
     # Pasos (steps) que se ejecutarán secuencialmente
+    # En tu archivo de workflow de GitHub Actions:
     steps:
-      # Paso 1: Clonar el código del repositorio en la máquina virtual
       - name: Checkout code
-        uses: actions/checkout@v4 # Acción predefinida para clonar el repo
+        uses: actions/checkout@v4
 
-      # Paso 2: Construir y levantar los contenedores en modo detached (-d)
-      # --build: reconstruye las imágenes si es necesario
-      # --abort-on-container-exit: hace que el comando falle si algún contenedor esencial se detiene inesperadamente
-      - name: Build and Run Docker Compose
-        run: docker compose --file docker-compose.yml up --build -d --abort-on-container-exit
-        # Nota: Cambia 'docker-compose.yml' si tu archivo tiene otro nombre o está en otra ruta
+      # Inicia en detached (segundo plano)
+      - name: Build and Run Docker Compose (Detached)
+        run: docker compose --file docker-compose.yaml up --profile prod --build -d
 
-      # (Opcional) Paso 3: Esperar un poco para que los servicios se inicien (si es necesario)
-      # Podrías necesitar esto si tienes healthchecks o quieres hacer una verificación rápida
-      # - name: Wait for services
-      #   run: sleep 15
+      # Espera un poco para que los contenedores intenten arrancar
+      - name: Wait for services startup attempt
+        run: sleep 30 
 
-      # (Opcional) Paso 4: Verificar si los contenedores están corriendo (ejemplo básico)
-      # Esto comprueba que al menos un contenedor esté en estado "Up"
-      - name: Check running containers
+      # Verifica el estado de los contenedores
+      - name: Check container status
         run: |
-          if [ -z "$(docker compose ps -q --filter status=running)" ]; then
-            echo "::error::No containers seem to be running after compose up!"
-            docker compose ps # Muestra el estado para depuración
-            exit 1
+          # Busca contenedores que NO estén en estado 'running' o 'healthy' (si usas healthchecks)
+          # El comando 'docker compose ps --quiet --filter status=running' lista los IDs de los que SÍ corren
+          # Comparamos con la lista total de servicios esperados
+          EXPECTED_SERVICES=$(docker compose --profile prod config --services)
+          RUNNING_SERVICES=$(docker compose --profile prod ps --quiet --filter status=running)
+          
+          # O una forma más simple: buscar contenedores con estado exited/dead
+          EXITED_CONTAINERS=$(docker compose --profile prod ps --quiet --filter status=exited)
+          if [ -n "$EXITED_CONTAINERS" ]; then
+              echo "::error::One or more containers exited unexpectedly!"
+              docker compose --profile prod ps # Muestra estado de todos
+              echo "--- Logs from exited containers ---"
+              docker compose --profile prod logs # Muestra logs, puede ayudar a ver por qué falló
+              exit 1
           else
-            echo "Docker Compose services started successfully."
-            docker compose ps # Muestra los servicios corriendo
+              echo "All expected services seem to be running or starting."
+              docker compose --profile prod ps
           fi
+          # Nota: Podrías añadir verificaciones más robustas aquí, como esperar healthchecks
+
+      # (Aquí podrías ejecutar pruebas)
 
       # Paso 5: Detener y eliminar los contenedores para limpiar el entorno
-      # Es importante para no dejar procesos corriendo en la máquina virtual de GitHub Actions
+      # Detiene y elimina los contenedores
       - name: Stop and Remove Docker Compose services
-        # Se ejecuta siempre, incluso si pasos anteriores fallaron, para asegurar limpieza
         if: always()
-        run: docker compose --file docker-compose.yml down
-        # Nota: Cambia 'docker-compose.yml' si tu archivo tiene otro nombre o está en otra ruta
+        run: docker compose --file docker-compose.yaml down --volumes
