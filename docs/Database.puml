@@ -1,0 +1,99 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+class Person {
+    rut : CharField
+    dv : CharField
+    first_name : CharField
+    middle_name : CharField
+    first_surname : CharField
+    second_surname : CharField
+    birthdate : DateField
+    gender : CharField
+    address : CharField
+    mobile : PositiveIntegerField
+    email : CharField
+}
+
+class Patient {
+    person : Person (OneToOne)
+    emergency_contact : CharField
+    emergency_email : CharField
+    emergency_mobile : PositiveIntegerField
+    medical_care : CharField
+    weight : DecimalField
+    last_hba1c : PositiveIntegerField
+    stroke_suffered : BooleanField
+    blood_preassure : PositiveIntegerField
+}
+
+class Personnel {
+    person : Person (OneToOne)
+    specialty : CharField
+    password : CharField
+}
+
+class Center {
+    name : CharField
+    city : CharField
+    county : CharField
+    street : CharField
+    mobile : BigIntegerField
+    opening_hours : TimeField
+    closing_hours : TimeField
+    open_24hrs : BooleanField
+}
+
+class Device {
+    + id_device : CharField (PK)
+    patient : Patient (ForeignKey, nullable)
+}
+
+class Sample {
+    version : CharField
+    id_device : Device (ForeignKey)
+    geolocation : CharField
+    send_data : DateTimeField
+}
+
+class InsulinSample {
+    sample : Sample (OneToOne)
+    stop_buzzer : DateTimeField
+    confirm_type : DateTimeField
+    mount_syringe : DateTimeField
+    start_dose : DateTimeField
+    confirm_dose : DateTimeField
+    confirm_insulin_admin : DateTimeField
+    insulin_dose : IntegerField
+    insulin_type : CharField
+}
+
+class GlucoseSample {
+    sample : Sample (OneToOne)
+    confirm_glucose_test : DateTimeField
+    index : DecimalField
+}
+
+class Treatment {
+    beginning_date : DateTimeField
+    type : CharField
+    quantity : IntegerField
+    first_administration : TimeField
+    second_administration : TimeField
+    patient : Patient (ForeignKey)
+}
+
+' Relationships
+Patient "1" -- "1" Person : person
+Personnel "1" -- "1" Person : person
+Patient "1" -- "*" Treatment : treatments
+Patient "1" -- "*" Device : devices (nullable)
+Patient "*" -- "*" Personnel : patients
+Personnel "*" -- "*" Center : centers
+Device "1" -- "*" Sample : samples
+Sample "1" -- "1" InsulinSample : sample
+Sample "1" -- "1" GlucoseSample : sample
+
+@enduml

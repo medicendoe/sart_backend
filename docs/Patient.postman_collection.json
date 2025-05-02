@@ -1,0 +1,106 @@
+{
+	"info": {
+		"_postman_id": "cb60e5f0-4632-498f-b370-21e13cbdebe8",
+		"name": "Patient",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40715451"
+	},
+	"item": [
+		{
+			"name": "Trae todos los pacientes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/patient/getall/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"patient",
+						"getall",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crea un paciente",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"person\": {\n         \"rut\": \"11223344\",\n         \"dv\": \"5\",\n         \"first_name\": \"Carlos\",\n         \"middle_name\": \"Alberto\",\n         \"first_surname\": \"Soto\",\n         \"second_surname\": \"Pérez\",\n         \"birthdate\": \"1990-10-20\", // Formato YYYY-MM-DD\n         \"gender\": \"M\",\n         \"address\": \"Avenida Siempreviva 789\",\n         \"mobile\": 988776655,\n         \"email\": \"carlos.soto@email.com\"\n    },\n    \"emergency_contact\": \"María Soto\",\n    \"emergency_email\": \"maria.soto@email.com\",\n    \"emergency_mobile\": 977665544,\n    \"medical_care\": \"Fonasa\",\n    \"weight\": \"75.50\",\n    \"last_hba1c\": 7,\n    \"stroke_suffered\": false,\n    \"blood_preassure\": 120,\n    \"personnels\": [1]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/patient/create/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"patient",
+						"create",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Trae los pacientes de un miembro del staff",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/patient/personnel/{{personnel_id}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"patient",
+						"personnel",
+						"{{personnel_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "personnel_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

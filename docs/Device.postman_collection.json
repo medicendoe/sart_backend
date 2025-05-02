@@ -1,0 +1,38 @@
+{
+	"info": {
+		"_postman_id": "9a787c02-1bf2-40f5-a392-26d91cb7d001",
+		"name": "Device",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40715451"
+	},
+	"item": [
+		{
+			"name": "Crea un nuevo dispositivo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id_device\": \"device123\",\n  \"patient\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/device/create/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"device",
+						"create",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

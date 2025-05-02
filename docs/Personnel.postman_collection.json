@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "03088402-a455-4bef-b584-4e2550ee585c",
+		"name": "Personnel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40715451"
+	},
+	"item": [
+		{
+			"name": "Trae todos los miembros del staff",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/personnel/getall/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"personnel",
+						"getall",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crea un miembro del staff",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"person\": {\n         \"rut\": \"12345678\",\n         \"dv\": \"9\",\n         \"first_name\": \"Ana\",\n         \"middle_name\": \"Isabel\",\n         \"first_surname\": \"Gómez\",\n         \"second_surname\": \"López\",\n         \"birthdate\": \"1985-05-15\", // Formato YYYY-MM-DD\n         \"gender\": \"F\",\n         \"address\": \"Calle Falsa 456\",\n         \"mobile\": 912345678,\n         \"email\": \"ana.gomez@email.com\"\n    },\n    \"specialty\": \"Endocrinología\",\n    \"password\": \"passwordSeguro123\", // Considera un hash en producción\n    \"centers\": [1] // IDs de los centros a los que pertenece\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/personnel/create/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"personnel",
+						"create",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logea a un miembro del staff",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"ana.gomez@email.com\",\n  \"password\": \"passwordSeguro123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/personnel/login/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"personnel",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Trae los miembros del staff de un centro",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/personnel/center/{{center_id}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"personnel",
+						"center",
+						"{{center_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "center_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
