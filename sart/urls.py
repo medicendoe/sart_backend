@@ -15,16 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from .views import SampleCreate, DummyGetLast, CenterCreate, CenterList, PersonnelCreate, PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter, PatientsByPersonnel, DeviceCreate
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import (
+    SampleCreate, CenterCreate, CenterList, PersonnelCreate, PersonnelList, 
+    PatientCreate, PatientList, PersonnelByCenter, PatientsByPersonnel, 
+    DeviceCreate, PersonnelLoginView
+)
 
 urlpatterns = [
+    # Auth endpoints - sin protección JWT
+    path('auth/login/', PersonnelLoginView.as_view(), name='personnel-login'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    
+    # API endpoints protegidos
     path('sample/create/', SampleCreate.as_view()),
-    path('sample/dummy/last/', DummyGetLast.as_view()),
     path('center/create/', CenterCreate.as_view()),
     path('center/getall/', CenterList.as_view()),
     path('personnel/create/', PersonnelCreate.as_view()),
     path('personnel/getall/', PersonnelList.as_view()),
-    path('personnel/login/', PersonnelLogin.as_view()),
     path('patient/create/', PatientCreate.as_view()),
     path('patient/getall/', PatientList.as_view()),
     path('device/create/', DeviceCreate.as_view()),

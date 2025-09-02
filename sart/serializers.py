@@ -1,5 +1,29 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 from .models import Sample, InsulinSample, GlucoseSample, Center, Personnel, Patient, Person, Device
+
+class PersonnelLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        try:
+            person = Person.objects.get(email=email)
+            personnel = Personnel.objects.get(person=person)
+            
+            if personnel.check_password(password):
+                return {
+                    'personnel': personnel,
+                    'person': person
+                }
+            else:
+                raise serializers.ValidationError('Credenciales inválidas')
+                
+        except (Person.DoesNotExist, Personnel.DoesNotExist):
+            raise serializers.ValidationError('Credenciales inválidas')
 
 class SampleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,6 +56,7 @@ class PersonSerializer(serializers.ModelSerializer):
 
 class PersonnelSerializer(serializers.ModelSerializer):
     person = PersonSerializer(required=False)
+    password = serializers.CharField(write_only=True)
     
     class Meta:
         model = Personnel
@@ -40,6 +65,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         person_data = validated_data.pop('person', None)
         center_data = validated_data.pop('centers', None)
+        password = validated_data.pop('password', None)
         
         # Create the Person instance if person data is provided
         if person_data:
@@ -48,6 +74,12 @@ class PersonnelSerializer(serializers.ModelSerializer):
         
         # Create the Personnel instance
         personnel = Personnel.objects.create(**validated_data)
+        
+        # Set password if provided
+        if password:
+            personnel.set_password(password)
+            personnel.save()
+        
         if center_data:
             personnel.centers.set(center_data)
                 
