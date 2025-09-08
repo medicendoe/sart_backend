@@ -17,13 +17,14 @@ Including another URLconf
 from django.urls import path
 from django.contrib import admin
 from .views import SampleCreate, DummyGetLast, CenterCreate, CenterList, PersonnelCreate, PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter, PatientsByPersonnel, DeviceCreate
-from .models import Patient, Personnel, Device, Sample, Person, Center
+from .models import Patient, Personnel, Device, Sample, Person, Center, Treatment
 admin.site.register(Patient)
 admin.site.register(Person)
 admin.site.register(Personnel)
 admin.site.register(Device)
 admin.site.register(Sample)
 admin.site.register(Center)
+admin.site.register(Treatment)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

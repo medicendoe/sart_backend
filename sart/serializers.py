@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Sample, InsulinSample, GlucoseSample, Center, Personnel, Patient, Person, Device
+from .models import Sample, InsulinSample, Treatment, GlucoseSample, Center, Personnel, Patient, Person, Device
 
 class SampleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,6 +30,11 @@ class PersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = '__all__'
 
+class TreatmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Treatment
+        fields = '__all__'
+
 class PersonnelSerializer(serializers.ModelSerializer):
     person = PersonSerializer(required=False)
     
@@ -55,6 +60,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     person = PersonSerializer(required=False)
+    treatments = TreatmentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Patient
