@@ -10,7 +10,17 @@
 			"name": "Crea un nuevo dispositivo",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"id_device\": \"device123\",\n  \"patient\": 1\n}",

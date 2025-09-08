@@ -10,7 +10,12 @@
 			"name": "Crear un sample",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"version\": \"1.0\",\n  \"id_device\": \"device123\",\n  \"geolocation\": \"40.7128,-74.0060\",\n  \"send_data\": \"2025-04-30T12:00:00Z\",\n  \"data-insulin\": {\n    \"stop_buzzer\": \"2025-04-30T12:01:00Z\",\n    \"confirm_type\": \"2025-04-30T12:02:00Z\",\n    \"mount_syringe\": \"2025-04-30T12:03:00Z\",\n    \"start_dose\": \"2025-04-30T12:04:00Z\",\n    \"confirm_dose\": \"2025-04-30T12:05:00Z\",\n    \"confirm_insulin_admin\": \"2025-04-30T12:06:00Z\",\n    \"insulin_dose\": 10,\n    \"insulin_type\": \"NPH\"\n  },\n  \"data-glucose\": {\n    \"confirm_glucose_test\": \"2025-04-30T12:07:00Z\",\n    \"index\": 5.5\n  }\n}",

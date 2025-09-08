@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password, check_password
 
 
 class Sample(models.Model):
@@ -58,14 +60,57 @@ class Person(models.Model):
     mobile = models.PositiveIntegerField()
     email = models.CharField(max_length=200)
 
-    def __str__(self):
-        return self.first_name
 
-class Personnel(models.Model):
+class PersonnelManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El email es obligatorio')
+        
+        # Buscar o crear Person
+        person_data = extra_fields.pop('person_data', {})
+        person_data['email'] = email
+        person, created = Person.objects.get_or_create(email=email, defaults=person_data)
+        
+        personnel = self.model(person=person, **extra_fields)
+        personnel.set_password(password)
+        personnel.save(using=self._db)
+        return personnel
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+
+class Personnel(AbstractBaseUser, PermissionsMixin):
     person = models.OneToOneField(Person, on_delete=models.CASCADE)
     specialty = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=128)
     centers = models.ManyToManyField('Center', related_name='centers')
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = PersonnelManager()
+
+    USERNAME_FIELD = 'person'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return f"{self.person.first_name} {self.person.first_surname}"
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    @property
+    def email(self):
+        return self.person.email
+
+    @property
+    def username(self):
+        return self.person.email
 
     def __str__(self):
         return self.person.first_name
