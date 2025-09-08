@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
 from django.contrib.auth import authenticate
-from .models import Sample, InsulinSample, GlucoseSample, Center, Personnel, Patient, Person, Device
+from .models import Sample, InsulinSample, Treatment, GlucoseSample, Center, Personnel, Patient, Person, Device
+
 
 class PersonnelLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -54,6 +56,11 @@ class PersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = '__all__'
 
+class TreatmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Treatment
+        fields = '__all__'
+
 class PersonnelSerializer(serializers.ModelSerializer):
     person = PersonSerializer(required=False)
     password = serializers.CharField(write_only=True)
@@ -87,6 +94,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     person = PersonSerializer(required=False)
+    treatments = TreatmentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Patient

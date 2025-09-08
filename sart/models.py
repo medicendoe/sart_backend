@@ -60,6 +60,7 @@ class Person(models.Model):
     mobile = models.PositiveIntegerField()
     email = models.CharField(max_length=200)
 
+
 class PersonnelManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -111,6 +112,9 @@ class Personnel(AbstractBaseUser, PermissionsMixin):
     def username(self):
         return self.person.email
 
+    def __str__(self):
+        return self.person.first_name
+
 class Patient(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE)
     emergency_contact = models.CharField(max_length=200)
@@ -121,4 +125,11 @@ class Patient(models.Model):
     last_hba1c = models.PositiveIntegerField()
     stroke_suffered = models.BooleanField(default=False)
     blood_preassure = models.PositiveIntegerField()
+    adherence = models.CharField(max_length=5)
+    nph = models.CharField(max_length=5)
+    insulin_type = models.CharField(max_length=5)
+    glucose = models.CharField(max_length=5)
     personnels = models.ManyToManyField('Personnel', related_name='patients')
+
+    def __str__(self):
+        return self.person.first_name
