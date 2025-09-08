@@ -50,7 +50,7 @@ services:
     environment:
       - SECRET_KEY=django-insecure-@vb7#n+=9bgqq!io+8n=vlex6(1n%em!ygi7^12!+=h3-^o&_9
       - DEBUG=True
-      - DJANGO_ALLOWED_HOSTS=localhost
+      - DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
       - DB_NAME=sart
       - DB_USER=root
       - DB_PASSWORD=sart

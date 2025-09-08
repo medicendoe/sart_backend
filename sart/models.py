@@ -91,7 +91,7 @@ class Personnel(AbstractBaseUser, PermissionsMixin):
 
     objects = PersonnelManager()
 
-    USERNAME_FIELD = 'person__email'
+    USERNAME_FIELD = 'person'
     REQUIRED_FIELDS = []
 
     def __str__(self):
