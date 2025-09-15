@@ -10,7 +10,13 @@
 			"name": "Trae todos los miembros del staff",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "{{base_url}}/personnel/getall/",
 					"host": [
@@ -29,10 +35,20 @@
 			"name": "Crea un miembro del staff",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"person\": {\n         \"rut\": \"12345678\",\n         \"dv\": \"9\",\n         \"first_name\": \"Ana\",\n         \"middle_name\": \"Isabel\",\n         \"first_surname\": \"Gómez\",\n         \"second_surname\": \"López\",\n         \"birthdate\": \"1985-05-15\", // Formato YYYY-MM-DD\n         \"gender\": \"F\",\n         \"address\": \"Calle Falsa 456\",\n         \"mobile\": 912345678,\n         \"email\": \"ana.gomez@email.com\"\n    },\n    \"specialty\": \"Endocrinología\",\n    \"password\": \"passwordSeguro123\", // Considera un hash en producción\n    \"centers\": [1] // IDs de los centros a los que pertenece\n}",
+					"raw": "{\n    \"person\": {\n         \"rut\": \"12345678\",\n         \"dv\": \"9\",\n         \"first_name\": \"Ana\",\n         \"middle_name\": \"Isabel\",\n         \"first_surname\": \"Gómez\",\n         \"second_surname\": \"López\",\n         \"birthdate\": \"1985-05-15\",\n         \"gender\": \"F\",\n         \"address\": \"Calle Falsa 456\",\n         \"mobile\": 912345678,\n         \"email\": \"ana.gomez@email.com\"\n    },\n    \"specialty\": \"Endocrinología\",\n    \"password\": \"passwordSeguro123\",\n    \"centers\": [1]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -55,9 +71,29 @@
 		},
 		{
 			"name": "Logea a un miembro del staff",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const responseJson = pm.response.json();",
+							"    pm.environment.set('access_token', responseJson.access);",
+							"    pm.environment.set('refresh_token', responseJson.refresh);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"email\": \"ana.gomez@email.com\",\n  \"password\": \"passwordSeguro123\"\n}",
@@ -68,13 +104,60 @@
 					}
 				},
 				"url": {
-					"raw": "{{base_url}}/personnel/login/",
+					"raw": "{{base_url}}/auth/login/",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
-						"personnel",
+						"auth",
 						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const responseJson = pm.response.json();",
+							"    pm.environment.set('access_token', responseJson.access);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/auth/refresh/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"refresh",
 						""
 					]
 				}
@@ -85,7 +168,13 @@
 			"name": "Trae los miembros del staff de un centro",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "{{base_url}}/personnel/center/{{center_id}}/",
 					"host": [

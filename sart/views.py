@@ -1,13 +1,44 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import GlucoseSample, InsulinSample, Sample, Center, Personnel, Patient, Person
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Center, Personnel, Patient
 from .serializers import (
-    SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer,
-    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer
+    SampleGeneralSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer, PersonnelLoginSerializer
 )
 
+class PersonnelLoginView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = PersonnelLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            personnel = serializer.validated_data['personnel']
+            person = serializer.validated_data['person']
+            
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(personnel)
+            refresh['email'] = person.email
+            refresh['name'] = f"{person.first_name} {person.first_surname}"
+            refresh['specialty'] = personnel.specialty
+            refresh['personnel_id'] = personnel.id
+            
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': {
+                    'id': personnel.id,
+                    'email': person.email,
+                    'name': f"{person.first_name} {person.first_surname}",
+                    'specialty': personnel.specialty
+                }
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SampleCreate(APIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
 
         data = {}
@@ -15,7 +46,7 @@ class SampleCreate(APIView):
 
         try:
             sample_data['version'] = request.data['version']
-            sample_data['id_device'] = request.data['id_device']
+            sample_data['device'] = request.data['device_id']
             sample_data['geolocation'] = request.data['geolocation']
             sample_data['send_data'] = request.data['send_data']
 
@@ -33,37 +64,6 @@ class SampleCreate(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class DummyGetLast(APIView):
-    def get(self, request, *args, **kwargs):
-        try:
-
-            sample = Sample.objects.all().latest("id")
-            sampleSerializer = SampleSerializer(sample)
-
-            try:
-                insulinSample = InsulinSample.objects.get(sample=sample)
-                insulinSerializer = InsulinSampleSerializer(insulinSample)
-            except InsulinSample.DoesNotExist:
-                insulinSample = None
-                print("No insulin data.")
-
-            try:
-                glucoseSample = GlucoseSample.objects.get(sample=sample)
-                glucoseSerializer = GlucoseSampleSerializer(glucoseSample)
-            except GlucoseSample.DoesNotExist:
-                glucoseSample = None
-                print("No glucose data.")
-
-            return Response({
-                "sample": sampleSerializer.data, 
-                "insulin": insulinSerializer.data if insulinSample != None else {}, 
-                "glucose": glucoseSerializer.data if glucoseSample != None else {}
-            }, status.HTTP_200_OK)
-
-        except Sample.DoesNotExist:
-
-            return Response({"detail": "No sample found."}, status=status.HTTP_404_NOT_FOUND)
 
 class CenterCreate(APIView):
     def post(self, request, *args, **kwargs):
@@ -156,47 +156,6 @@ class PersonnelByCenter(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-class PersonnelLogin(APIView):
-    
-    def post(self, request, *args, **kwargs):
-        try:
-            email = request.data.get('email')
-            password = request.data.get('password')
-            
-            # Validación básica
-            if not email or not password:
-                return Response({'error': 'Email y contraseña son obligatorios'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Buscar persona por email
-            try:
-                person = Person.objects.get(email=email)
-            except Person.DoesNotExist:
-                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
-            
-            # Verificar si tiene un perfil de personal asociado
-            try:
-                personnel = Personnel.objects.get(person=person)
-            except Personnel.DoesNotExist:
-                return Response({'error': 'Este usuario no es personal médico'}, status=status.HTTP_403_FORBIDDEN)
-            
-            # Verificar contraseña - autenticación simple
-            if personnel.password != password:
-                return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
-            
-            # Retornar éxito y datos básicos (sin token)
-            return Response({
-                'success': True,
-                'user': {
-                    'id': personnel.id,
-                    'name': f"{person.first_name} {person.first_surname}",
-                    'email': person.email,
-                    'specialty': personnel.specialty
-                }
-            })
-            
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DeviceCreate(APIView):
     def post(self, request, *args, **kwargs):
