@@ -1,4 +1,4 @@
-from sart.models import Patient, Person, Personnel
+from sart.models import Patient, Person, Personnel, Device
 
 superuser = Personnel.objects.create_superuser(
     email='admin@example.com',
@@ -40,7 +40,11 @@ patient1 = Patient.objects.create(
     weight=65.50,
     last_hba1c=6,
     stroke_suffered=False,
-    blood_preassure=120
+    blood_preassure=120,
+    adherence='Alto',
+    nph='Sí',
+    insulin_type='NPH',
+    glucose='Mid'
 )
 
 # Paciente 2
@@ -65,7 +69,11 @@ patient2 = Patient.objects.create(
     weight=78.20,
     last_hba1c=7,
     stroke_suffered=True,
-    blood_preassure=140
+    blood_preassure=140,
+    adherence='Medio',
+    nph='Sí',
+    insulin_type='Rapid',
+    glucose='Alto'
 )
 
 # Paciente 3
@@ -90,7 +98,11 @@ patient3 = Patient.objects.create(
     weight=59.80,
     last_hba1c=5,
     stroke_suffered=False,
-    blood_preassure=110
+    blood_preassure=110,
+    adherence='Alto',
+    nph='No',
+    insulin_type='Long',
+    glucose='Bajo'
 )
 
 # Paciente 4
@@ -115,7 +127,11 @@ patient4 = Patient.objects.create(
     weight=82.10,
     last_hba1c=8,
     stroke_suffered=False,
-    blood_preassure=135
+    blood_preassure=135,
+    adherence='Bajo',
+    nph='Sí',
+    insulin_type='Mix',
+    glucose='Alto'
 )
 
 # Paciente 5
@@ -140,7 +156,11 @@ patient5 = Patient.objects.create(
     weight=72.30,
     last_hba1c=6,
     stroke_suffered=False,
-    blood_preassure=125
+    blood_preassure=125,
+    adherence='Medio',
+    nph='Sí',
+    insulin_type='NPH',
+    glucose='Mid'
 )
 
 print("5 pacientes creados exitosamente:")
@@ -163,8 +183,12 @@ patients = [patient1, patient2, patient3, patient4, patient5]
 devices = []
 for i, (patient, device_code) in enumerate(zip(patients, device_codes), 1):
     device = Device.objects.create(
-        id_device=device_code,
+        id=device_code,
         patient=patient
     )
     devices.append(device)
     print(f"Dispositivo {i} creado: {device_code} -> {patient.person.first_name} {patient.person.first_surname}")
+
+print("\n5 pacientes y dispositivos creados exitosamente:")
+for i, (patient, device) in enumerate(zip(patients, devices), 1):
+    print(f"{i}. {patient.person.first_name} {patient.person.first_surname} - Dispositivo: {device.id}")
