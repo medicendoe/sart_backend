@@ -46,7 +46,7 @@ class SampleCreate(APIView):
 
         try:
             sample_data['version'] = request.data['version']
-            sample_data['id_device'] = request.data['id_device']
+            sample_data['device'] = request.data['device_id']
             sample_data['geolocation'] = request.data['geolocation']
             sample_data['send_data'] = request.data['send_data']
 
