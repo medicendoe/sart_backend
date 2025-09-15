@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password, check_password
 
 class Sample(models.Model):
     version = models.CharField(max_length=5)
-    id_device = models.ForeignKey('Device', on_delete=models.CASCADE, related_name='samples')
+    device = models.ForeignKey('Device', on_delete=models.CASCADE, related_name='samples')
     geolocation = models.CharField(max_length=100)
     send_data = models.DateTimeField()
 
@@ -21,7 +21,7 @@ class InsulinSample(models.Model):
     insulin_type = models.CharField(max_length=50)
 
 class Device(models.Model):
-    id_device = models.CharField(max_length=100, primary_key=True)
+    id = models.CharField(max_length=100, primary_key=True)
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='devices', null=True)
 
 class GlucoseSample(models.Model):
