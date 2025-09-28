@@ -16,13 +16,19 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
-from .views import SampleCreate, DummyGetLast, CenterCreate, CenterList, PersonnelCreate, PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter, PatientsByPersonnel, DeviceCreate
+from .views import (
+    SampleCreate, DummyGetLast, CenterCreate, CenterList, PersonnelCreate,
+    PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter,
+    PatientsByPersonnel, DeviceCreate, SamplesByPatient, InsulinSample, GlucoseSample)
+
 from .models import Patient, Personnel, Device, Sample, Person, Center, Treatment
 admin.site.register(Patient)
 admin.site.register(Person)
 admin.site.register(Personnel)
 admin.site.register(Device)
 admin.site.register(Sample)
+admin.site.register(InsulinSample)
+admin.site.register(GlucoseSample)
 admin.site.register(Center)
 admin.site.register(Treatment)
 
@@ -30,6 +36,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('sample/create/', SampleCreate.as_view()),
     path('sample/dummy/last/', DummyGetLast.as_view()),
+    path('sample/patient/<int:patient_id>/', SamplesByPatient.as_view(), name='samples-by-patient'),
     path('center/create/', CenterCreate.as_view()),
     path('center/getall/', CenterList.as_view()),
     path('personnel/create/', PersonnelCreate.as_view()),

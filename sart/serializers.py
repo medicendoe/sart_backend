@@ -1,10 +1,33 @@
 from rest_framework import serializers
 from .models import Sample, InsulinSample, Treatment, GlucoseSample, Center, Personnel, Patient, Person, Device
 
+class AllSamplesSerializer(serializers.ModelSerializer):
+    insulin = serializers.SerializerMethodField()
+    glucose = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sample
+        fields = ['id', 'version', 'geolocation', 'send_data', 'insulin', 'glucose']
+
+    def get_insulin(self, obj):
+        try:
+            insulin_sample = InsulinSample.objects.get(sample=obj)
+            return InsulinSampleSerializer(insulin_sample).data
+        except InsulinSample.DoesNotExist:
+            return None
+
+    def get_glucose(self, obj):
+        try:
+            glucose_sample = GlucoseSample.objects.get(sample=obj)
+            return GlucoseSampleSerializer(glucose_sample).data
+        except GlucoseSample.DoesNotExist:
+            return None
+
 class SampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = "__all__"
+
 
 class InsulinSampleSerializer(serializers.ModelSerializer):
     sample = SampleSerializer(required=False)

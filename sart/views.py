@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from .models import GlucoseSample, InsulinSample, Sample, Center, Personnel, Patient, Person
 from .serializers import (
     SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer,
-    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer
+    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer,
+    AllSamplesSerializer
 )
 
 class SampleCreate(APIView):
@@ -33,6 +34,52 @@ class SampleCreate(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SamplesByPatient(APIView):
+    def get(self, request, patient_id, *args, **kwargs):
+        try:
+            patient = Patient.objects.get(id=patient_id)
+            samples = Sample.objects.filter(id_device__patient=patient)
+
+            result = []
+            for sample in samples:
+                sample_data = SampleSerializer(sample).data
+                
+                # Check if insulin or glucose sample exists for this Sample
+                insulin_exists = InsulinSample.objects.filter(sample=sample).exists()
+                glucose_exists = GlucoseSample.objects.filter(sample=sample).exists()
+
+                sample_type = "Unknown"
+                extra_data = {}
+
+                if insulin_exists:
+                    sample_type = "Insulin"
+                    insulin = InsulinSample.objects.get(sample=sample)
+                    extra_data = InsulinSampleSerializer(insulin).data
+                elif glucose_exists:
+                    sample_type = "Glucose"
+                    glucose = GlucoseSample.objects.get(sample=sample)
+                    extra_data = GlucoseSampleSerializer(glucose).data
+                
+                # Compose combined dict with type and details
+                sample_data['type'] = sample_type
+                sample_data['details'] = extra_data
+                
+                result.append(sample_data)
+
+            return Response(result, status=status.HTTP_200_OK)
+
+        except Patient.DoesNotExist:
+            return Response(
+                {"error": f"Patient with id {patient_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class DummyGetLast(APIView):
     def get(self, request, *args, **kwargs):
