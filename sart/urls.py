@@ -16,6 +16,11 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
+from .views import (
+    SampleCreate, CenterCreate, CenterList, PersonnelCreate,
+    PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter,
+    PatientsByPersonnel, DeviceCreate, SamplesByPatient, InsulinSample, GlucoseSample, PeronnelLoginView)
+
 from .models import Patient, Personnel, Device, Sample, Person, Center, Treatment
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -24,14 +29,10 @@ admin.site.register(Person)
 admin.site.register(Personnel)
 admin.site.register(Device)
 admin.site.register(Sample)
+admin.site.register(InsulinSample)
+admin.site.register(GlucoseSample)
 admin.site.register(Center)
 admin.site.register(Treatment)
-
-from .views import (
-    SampleCreate, CenterCreate, CenterList, PersonnelCreate, PersonnelList, 
-    PatientCreate, PatientList, PersonnelByCenter, PatientsByPersonnel, 
-    DeviceCreate, PersonnelLoginView
-)
 
 urlpatterns = [
     # Auth endpoints - sin protección JWT
@@ -41,6 +42,7 @@ urlpatterns = [
     # API endpoints protegidos
     path('admin/', admin.site.urls),
     path('sample/create/', SampleCreate.as_view()),
+    path('sample/patient/<int:patient_id>/', SamplesByPatient.as_view(), name='samples-by-patient'),
     path('center/create/', CenterCreate.as_view()),
     path('center/getall/', CenterList.as_view()),
     path('personnel/create/', PersonnelCreate.as_view()),
