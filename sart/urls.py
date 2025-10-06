@@ -18,21 +18,10 @@ from django.urls import path
 from django.contrib import admin
 from .views import (
     SampleCreate, CenterCreate, CenterList, PersonnelCreate,
-    PersonnelList, PatientCreate, PatientList, PersonnelLogin, PersonnelByCenter,
-    PatientsByPersonnel, DeviceCreate, SamplesByPatient, InsulinSample, GlucoseSample, PeronnelLoginView)
+    PersonnelList, PatientCreate, PatientList, PersonnelLoginView, PersonnelByCenter,
+    PatientsByPersonnel, DeviceCreate, SamplesByPatient)
 
-from .models import Patient, Personnel, Device, Sample, Person, Center, Treatment
 from rest_framework_simplejwt.views import TokenRefreshView
-
-admin.site.register(Patient)
-admin.site.register(Person)
-admin.site.register(Personnel)
-admin.site.register(Device)
-admin.site.register(Sample)
-admin.site.register(InsulinSample)
-admin.site.register(GlucoseSample)
-admin.site.register(Center)
-admin.site.register(Treatment)
 
 urlpatterns = [
     # Auth endpoints - sin protección JWT
