@@ -3,7 +3,6 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import Sample, InsulinSample, Treatment, GlucoseSample, Center, Personnel, Patient, Person, Device
 
-
 class PersonnelLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -31,6 +30,7 @@ class SampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = "__all__"
+
 
 class InsulinSampleSerializer(serializers.ModelSerializer):
     sample = SampleSerializer(required=False)
