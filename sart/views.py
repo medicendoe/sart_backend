@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Center, Personnel, Patient
+from .models import Center, Personnel, Patient, Sample
 from .serializers import (
     SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer,
     GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer, PersonnelLoginSerializer
@@ -71,7 +71,7 @@ class SamplesByPatient(APIView):
     def get(self, request, patient_id, *args, **kwargs):
         try:
             patient = Patient.objects.get(id=patient_id)
-            samples = Sample.objects.filter(id_device__patient=patient)
+            samples = Sample.objects.filter(device_id__patient=patient)
 
             result = []
             for sample in samples:
