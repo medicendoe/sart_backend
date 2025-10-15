@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Center, Personnel, Patient, Sample
 from .serializers import (
     SampleGeneralSerializer, SampleSerializer, InsulinSampleSerializer,
-    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer, PersonnelLoginSerializer
+    GlucoseSampleSerializer, CenterSerializer, PersonnelSerializer, PatientSerializer, DeviceSerializer, PersonnelLoginSerializer, InsulinSample, GlucoseSample
 )
 
 class PersonnelLoginView(APIView):
