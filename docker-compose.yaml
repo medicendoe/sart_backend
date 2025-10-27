@@ -20,6 +20,8 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     attach: false
+    networks:
+      - sart-network
 
   api:
     build:
@@ -40,3 +42,9 @@ services:
       - DB_HOST=${DATABASE_HOST}
     expose:
       - 8000
+    networks:
+      - sart-network
+
+networks:
+  sart-network:
+    driver: bridge
