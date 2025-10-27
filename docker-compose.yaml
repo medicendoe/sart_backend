@@ -11,64 +11,40 @@ services:
       MYSQL_ROOT_PASSWORD: sart
       MYSQL_DATABASE: sart
       MYSQL_PORT: 3306
-    ports:
-      - '3306:3306'
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    expose:
+      - 3306
     volumes:
-      - ./data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     attach: false
-    profiles:
-      - prod
-      - dev
     networks:
-      - default
+      - sart-network
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: api
+    restart: always
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       - SECRET_KEY=django-insecure-@vb7#n+=9bgqq!io+8n=vlex6(1n%em!ygi7^12!+=h3-^o&_9
       - DEBUG=False
-      - DJANGO_ALLOWED_HOSTS=localhost
-      - DB_NAME=sart
-      - DB_USER=root
-      - DB_PASSWORD=sart
-      - DB_HOST=database
-    ports:
-      - '8000:8000'
-    profiles:
-      - prod
+      - DJANGO_ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DATABASE_HOST}
+    expose:
+      - 8000
     networks:
-      - default
-
-  apidev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: apidev
-    depends_on:
-      - database
-    environment:
-      - SECRET_KEY=django-insecure-@vb7#n+=9bgqq!io+8n=vlex6(1n%em!ygi7^12!+=h3-^o&_9
-      - DEBUG=True
-      - DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-      - DB_NAME=sart
-      - DB_USER=root
-      - DB_PASSWORD=sart
-      - DB_HOST=database
-    volumes:
-      - type: bind
-        source: ./sart
-        target: /app/sart
-    ports:
-      - '8000:8000'
-    profiles:
-      - dev
+      - sart-network
 
 networks:
-  default:
-    external: true
-    name: nginx
+  sart-network:
+    driver: bridge
